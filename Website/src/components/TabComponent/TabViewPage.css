@@ -1,0 +1,37 @@
+.tabViewPageEntries {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.tabViewPageTitle {
+    align-self: start;
+    font-size: 2.5em;
+
+}
+
+.tabViewContent {
+    border-top: 2px solid var(--text-secondary);
+}
+
+.tabViewPageEntry {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.5em;
+}
+
+.tabViewContainer {
+    border-radius: 1em;
+    padding: 1em;
+    width: 50%;
+    justify-self: center;
+}
+
+:root[data-theme="dark"] .tabViewContainer {
+    border: 1px solid var(--border-color);
+}
+
+:root[data-theme="light"] .tabViewContainer {
+    background-color: var(--bg2-color);
+    border: 1px solid var(--border-color);
+}

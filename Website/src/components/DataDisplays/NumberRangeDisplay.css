@@ -1,0 +1,54 @@
+.display-container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 25% 25% 25% 25%;
+    grid-template-areas: "value value"
+                         "unit unit"
+                         "rangeDisplay rangeDisplay"
+                         "bounds bounds";
+    min-height: 100%;
+    min-width: 80%;
+    align-items: center;
+    justify-items: center;
+}
+
+.rangeDisplay {
+    grid-area: rangeDisplay;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.value {
+    grid-area: value;
+    font-size: 1.5em;
+}
+.unit {
+    grid-area: unit;
+}
+.bounds {
+    grid-area: bounds;
+    display: flex;
+    justify-content: space-around;
+    min-width: 100%;
+}
+
+.gauge {
+    width: 70%;
+}
+
+.gauge-background,
+.gauge-progress {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+
+}
+
+.gauge-background {
+    stroke: #343941;
+}
+
+.gauge-progress {
+    stroke: #7ddc3a;
+}

@@ -1,0 +1,13 @@
+.notificationContainer {
+    min-width: 25vw;
+    min-height: 100vh;
+    background: transparent;
+    position: fixed;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: end;
+    pointer-events: none;
+}

@@ -1,0 +1,263 @@
+:root {
+    --glass-bg: rgba(20, 20, 20, 0.48);
+    --glass-border: rgba(255, 255, 255, 0.16);
+    --glass-shadow: rgba(0, 0, 0, 0.35);
+
+    --glass-highlight-strong: rgba(255, 255, 255, 0.22);
+    --glass-highlight-soft: rgba(255, 255, 255, 0.06);
+    --glass-glow: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="light"] {
+    --glass-bg: rgba(255, 255, 255, 0.52);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --glass-shadow: rgba(0, 0, 0, 0.14);
+
+    --glass-highlight-strong: rgba(255, 255, 255, 0.95);
+    --glass-highlight-soft: rgba(255, 255, 255, 0.3);
+    --glass-glow: rgba(255, 255, 255, 0.45);
+}
+
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+.dashboard {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.dashboard-content {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(5em, 25vw)
+    );
+
+    grid-auto-rows: minmax(25vh, 60vh);
+
+    gap: 1rem;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    padding: 1rem 1rem 5em;
+
+    grid-auto-flow: row dense;
+}
+
+.card-8,
+.card-5 {
+    grid-column: span 2;
+}
+
+@media (max-width: 700px) {
+    .card-8,
+    .card-5 {
+        grid-column: span 1;
+    }
+}
+
+.draggable-wrapper {
+    cursor: grab;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.draggable-wrapper:active {
+    cursor: grabbing;
+}
+
+.draggable-wrapper.dragging {
+    opacity: 0.4;
+    transform: scale(0.98);
+}
+
+.draggable-wrapper:hover {
+    transform: translateY(-2px);
+}
+
+.dragZoneOverlay {
+    border-radius: 1em;
+    outline: 2px dashed #4f8cff;
+    background: rgba(79, 140, 255, 0.08);
+}
+
+.dragZoneOverlayActive {
+    border-radius: 1em;
+    outline: 2px dashed #4fff72;
+    transform: translateY(-2px);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.dashboard-actionBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.dashboard-actionBar .left {
+    display: flex;
+    flex-direction: row;
+}
+
+.actionButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: .5em;
+
+    color: var(--text-primary);
+    font-size: 1em;
+
+    padding: .5em 1em;
+    margin-right: .5em;
+    max-height: 3em;
+    min-height: 3em;
+
+    cursor: pointer;
+}
+
+.actionButton:hover {
+    cursor: pointer;
+    background-color: var(--button-bg-color);
+}
+
+.actionDropdown {
+    position: relative;
+}
+
+
+.actionButtonContent {
+    position: absolute;
+    top: 3em;
+    left: 0;
+    width: 9vw;
+    padding: 1em;
+
+    display: flex;
+    flex-direction: column;
+
+    border: 1px solid var(--glass-border);
+    border-radius: 1em;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    rgba(255, 255, 255, 0.035),
+                    rgba(255, 255, 255, 0.01)
+            ),
+            var(--glass-bg);
+
+    backdrop-filter:
+            blur(28px)
+            saturate(180%)
+            brightness(1.05);
+
+    -webkit-backdrop-filter:
+            blur(28px)
+            saturate(180%)
+            brightness(1.05);
+
+    box-shadow:
+            0 18px 45px var(--glass-shadow),
+            inset 0 1px 0 var(--glass-highlight-soft),
+            inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+
+    overflow: hidden;
+    isolation: isolate;
+
+    transition:
+            background 0.3s ease,
+            border-color 0.3s ease,
+            box-shadow 0.3s ease,
+            backdrop-filter 0.3s ease;
+}
+
+.actionButtonContent:hover {
+    border-color: rgba(255, 255, 255, 0.24);
+
+    box-shadow:
+            0 20px 55px var(--glass-shadow),
+            inset 0 1px 0 var(--glass-highlight-strong);
+}
+
+.actionButtonContent label {
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-top: .5em;
+    font-size: 1em;
+}
+
+label input {
+    border: 1px solid var(--border-color);
+    border-radius: .35em;
+
+    background-color: transparent;
+
+    transition:
+            background-color .15s ease,
+            border-color .15s ease,
+            transform .1s ease;
+    height: 2em;
+}
+
+.displayType {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: .2em;
+    display: flex;
+    justify-content: space-between;
+    gap: .1em;
+}
+
+.displayType > button {
+    border: 1px solid transparent; /* reserve border space */
+    width: 50%;
+    min-height: 5em;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 1em;
+    border-radius: 1em;
+    transition: background-color .3s ease, border-color .3s ease;
+}
+
+.displayType > button:hover {
+    background-color: var(--glass-highlight-strong);
+    border-color: var(--glass-border);
+}
+
+.displayType > button.selected {
+    background-color: transparent;
+    border-color: var(--glass-border);
+}
+
+/* Keep the selected style even while hovering */
+.displayType > button.selected:hover {
+    background-color: var(--glass-highlight-strong);
+    border-color: var(--glass-border);
+}
+
+
+.dashboard-content.list {
+    grid-template-columns: 1fr;
+}
+
+.dashboard-content.list .draggable-wrapper {
+    grid-column: span 1 !important;
+}

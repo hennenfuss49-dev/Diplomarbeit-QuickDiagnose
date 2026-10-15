@@ -1,0 +1,21 @@
+.card {
+    border: 2px solid var(--border-color);
+    border-radius: 1em;
+    padding:1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+:root[data-theme="light"] .card {
+    background-color: var(--bg-color);
+}
+
+.cardTitle {
+    font-size: 1em;
+    align-self: start;
+}

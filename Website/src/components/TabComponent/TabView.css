@@ -1,0 +1,12 @@
+.tabViewContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabViewButtonsList {
+    display: flex;
+    flex-direction: row;
+    align-self: start;
+    gap: 1em;
+}

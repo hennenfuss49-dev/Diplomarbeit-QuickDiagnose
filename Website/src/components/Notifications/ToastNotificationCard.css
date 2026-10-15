@@ -1,0 +1,61 @@
+.toastContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--notification-card-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 1em;
+    color: var(--text-primary);
+    margin: .5em;
+    width: 25em;
+    min-height: 5em;
+    padding: 1em;
+
+    animation-name: toast-life;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease;
+}
+
+@keyframes toast-life {
+    0%,
+    85% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.toastMessage {
+    color: var(--text-secondary);
+}
+
+.toastType {
+    display: flex;
+    background-color: var(--button-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 1em;
+    width: 3em;
+    height: 3em;
+    margin-right: 1em;
+    align-items: center;
+    justify-content: center;
+}
+
+.toastType img {
+    width: 2em;
+    height: 2em;
+}
+
+
+.toastContent {
+    display: flex;
+    flex-direction: column;
+}
+
+.toastTitle {
+    font-weight: bold;
+    font-size: 1.5em;
+}
+

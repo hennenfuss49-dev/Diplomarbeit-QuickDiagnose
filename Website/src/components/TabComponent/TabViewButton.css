@@ -1,0 +1,19 @@
+.tabViewButton {
+    border: 0 solid transparent;
+    border-bottom: .2em solid transparent;
+    background-color: transparent;
+    color: var(--text-primary);
+    font-size: 1.5em;
+    height: 4em;
+}
+
+.tabViewButton:hover {
+    border-color: var(--border-color);
+    cursor: pointer;
+    transition: border-color ease-in-out .15s;
+}
+
+button.active {
+    border-bottom: .2em solid var(--text-primary);
+    transition: border-color ease-in-out .15s;
+}

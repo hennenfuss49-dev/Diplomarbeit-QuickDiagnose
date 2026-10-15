@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  transition:
+          background-color 0.3s ease,
+          color 0.3s ease,
+          border-color 0.3s ease,
+          fill 0.3s ease,
+          stroke 0.3s ease,
+          filter 0.3s ease;
+}
+
+/* variables */
+:root[data-theme="dark"] {
+  --bg-color: #101010;
+  --bg2-color: #090909;
+  --text-primary: #d5d5d5;
+  --text-secondary: #444444;
+  --button-bg-color: #1c1c1c;
+  --notification-primary-color: #004c00;
+  --notification-secondary-color: #1a261a;
+  --border-color: #1e1e1e;
+  --notification-card-bg-color: #151517;
+}
+
+:root[data-theme="light"] {
+  --bg-color: #f5f5f5;
+  --bg2-color: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --button-bg-color: #e8e8e8;
+  --border-color: #d5d5d5;
+  --notification-primary-color: #167516;
+  --notification-secondary-color: #e7f4e7;
+  --notification-card-bg-color: #f3f3f3;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, sans-serif;
+  font-size: 1.1em;
+  background: var(--bg-color);
+}
+
+/* layout */
+
+.sidebarBtn {
+  background-color: transparent;
+  color: var(--text-primary);
+  padding: .7em;
+  border: 1px solid transparent;
+  border-radius: .5em;
+  transition: ease-in-out .4s;
+}
+
+:root[data-theme="light"] .sidebarBtn img{
+  filter: invert(100%);
+}
+
+.sidebarBtn:hover {
+  background-color: var(--button-bg-color);
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  border-radius: .5em;
+  transition: ease-in-out .4s;
+}
+
+.sidebarBtn:active {
+  background-color: var(--button-bg-color);
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  border-radius: .5em;
+}
+
+.notificationBlob {
+  background-color: var(--notification-secondary-color);
+  color: var(--notification-primary-color);
+}
+
+select {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: .5em;
+  font-size: 1em;
+  padding: .5em;
+  width: 15%
+}
+
+select:focus {
+  background-color: var(--border-color);
+  border-color: var(--border-color);
+}
+
+option {
+  background-color: var(--bg2-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 1em;
+  padding: .5em;
+  width: 15%
+}
+
+option:focus {
+  background-color: var(--border-color);
+}
