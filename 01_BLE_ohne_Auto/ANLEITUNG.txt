@@ -1,0 +1,12 @@
+BLUETOOTH-TEST OHNE AUTO – ESP32-S3-DevKitC-1
+
+1. In VS Code den Ordner 01_BLE_ohne_Auto öffnen (mit platformio.ini).
+2. ESP32-S3 über USB-to-UART mit PC verbinden.
+3. PlatformIO: Build, danach Upload. Kein OBD-Adapter nötig.
+4. Im Terminal: cd Bluetooth_Testseite
+5. Dann: py -m http.server 8000 (alternativ python -m http.server 8000).
+6. In Chrome/Edge http://localhost:8000 öffnen.
+7. Bluetooth aktivieren und 'Mit ESP32 verbinden' anklicken. Gerät OBD-BLE-Test auswählen.
+8. Simulierte TEST-RPM-Werte sollten jede Sekunde eintreffen.
+
+Wichtig: Webseiten-Datei nicht einfach mit file:// öffnen. Windows Bluetooth-Pairing vorher nicht notwendig.
