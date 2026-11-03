@@ -113,6 +113,20 @@ body,
     flex-direction: row;
 }
 
+.statusDisconnected {
+    background-color: red;
+    width: 1em;
+    height: 1em;
+    border-radius: 100em;
+}
+
+.statusConnected {
+    background-color: var(--notification-primary-color);
+    width: 1em;
+    height: 1em;
+    border-radius: 100em;
+}
+
 .actionButton {
     display: inline-flex;
     align-items: center;

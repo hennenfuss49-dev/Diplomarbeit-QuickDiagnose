@@ -2,17 +2,24 @@ import React, {
     createContext,
     useContext,
     useEffect,
-    useMemo,
+    useMemo, useRef,
     useState
 } from "react";
 
-import type { DataMessage, DataPoint } from "../Services/types";
+import type {DataMessage, DataPoint, DataSet} from "../Services/types";
 import { WebSocketService } from "../Services/WebSocketService";
+import type { ConnectionService } from "../Services/ConnectionService";
+import {createConnection} from "../Services/ServiceFactory";
 
 
 interface DataContextType {
     datasets: Record<string, DataPoint[]>;   // dataset name -> datapoints
     liveData: Record<string, DataPoint>;     // point.name -> point (aus "live_data")
+    errorCodes: DataSet;   // dataset name -> errorCodes
+
+    isConnected: boolean;
+    connectService: () => void;
+    disconnectService: () => void;
 }
 
 
@@ -24,45 +31,90 @@ export function DataProvider(
 ) {
 
     const [datasets, setDatasets] = useState<Record<string, DataPoint[]>>({});
+    const [isConnected, setIsConnected] = useState(false);
 
+    const connectionRef = useRef<ConnectionService | null>(null);
+    const unsubscribeRef = useRef<(() => void)[]>([]);
+
+    // Disconnect when DataProvider unmounts
     useEffect(() => {
-
-        const websocket = new WebSocketService(
-            "ws://192.168.4.1/ws"
-        );
-
-        websocket.connect();
-
-        const unsubscribe = websocket.subscribe(
-            (message: DataMessage) => {
-                if (message.type === "dataset") {
-                    setDatasets(prev => ({
-                        ...prev,
-                        [message.name]: message.datapoints,
-                    }));
-                }
-            }
-        );
-
         return () => {
-            unsubscribe();
-            websocket.disconnect();
+            connectionRef.current?.disconnect();
+            connectionRef.current = null;
         };
-
     }, []);
+
+    const connectService = () => {
+        if (connectionRef.current !== null) return;
+
+        const connection = createConnection();
+        connectionRef.current = connection;
+
+        const unsubscribeData = connection.subscribe((message: DataMessage) => {
+            if (message.type === "dataset") {
+                setDatasets(prev => ({
+                    ...prev,
+                    [message.name]: message.datapoints
+                }));
+            }
+        });
+
+        const unsubscribeStatus = connection.onConnectionChange((connected) => {
+            if (connectionRef.current !== connection) return;
+
+            setIsConnected(connected);
+
+            if (!connected) {
+                unsubscribeRef.current.forEach(unsubscribe => unsubscribe());
+                unsubscribeRef.current = [];
+                connectionRef.current = null;
+            }
+        });
+
+        unsubscribeRef.current = [unsubscribeData, unsubscribeStatus];
+
+        connection.connect();
+    };
+
+    const disconnectService = () => {
+        unsubscribeRef.current.forEach(unsubscribe => unsubscribe());
+        unsubscribeRef.current = [];
+
+        connectionRef.current?.disconnect();
+        connectionRef.current = null;
+
+        setIsConnected(false);
+    };
 
 
     const liveData = useMemo(
-        () =>
-            Object.fromEntries(
-                (datasets["live_data"] ?? []).map(point => [point.name, point])
-            ),
+        () => Object.fromEntries(
+            (datasets["live_data"] ?? []).map(
+                point => [point.name, point]
+            )
+        ),
+        [datasets]
+    );
+
+    const errorCodes: DataSet = useMemo(
+        () => ({
+            type: "dataset",
+            name: "error_codes",
+            datapoints: datasets["error_codes"] ?? []
+        }),
         [datasets]
     );
 
     const value = useMemo(
-        () => ({ datasets, liveData }),
-        [datasets, liveData]
+        () => ({
+            datasets,
+            liveData,
+            errorCodes,
+            isConnected,
+            connectService,
+            disconnectService
+        }),
+        [datasets, liveData, errorCodes, isConnected]
     );
 
 

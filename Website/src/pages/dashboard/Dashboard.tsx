@@ -11,6 +11,7 @@ import {mockLineGraphData} from "../../types/LineGraph";
 import FilterIcon from '../../assets/img/filter_icon.svg';
 import SettingsIcon from '../../assets/img/settings_icon.svg';
 import React, {useState} from "react";
+import {useVehicleData} from "../../context/DataContext";
 
 
 const initialCards = [
@@ -21,7 +22,7 @@ const initialCards = [
         isVisible: true,
         content: (
             <ListDisplay
-                dataset={mockErrorCodes}
+                datakey="error_codes"
                 header={["Code", "Description", "State", "Timestamp"]}
             />
         ),
@@ -95,6 +96,7 @@ export const Dashboard = () => {
     const [cards, setCards] = useState(initialCards);
     const [draggedId, setDraggedId] = useState<string | null>(null);
     const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
+    const { isConnected, connectService, disconnectService } = useVehicleData();
 
     const handleDragStart = (id: string, e: React.DragEvent) => {
         setDraggedId(id);
@@ -218,6 +220,10 @@ export const Dashboard = () => {
                 </div>
 
                 <div className="right">
+                    <button className="actionButton" onClick={isConnected ? disconnectService : connectService}>
+                        <div className={!isConnected ? "statusDisconnected" : "statusConnected"}></div>
+                        {isConnected ? "Disconnect" : "Connect"}
+                    </button>
                     <div className="searchbar">
                         <span className="search-icon">⌕</span>
                         <input type="text" placeholder="Search Dashboard"/>

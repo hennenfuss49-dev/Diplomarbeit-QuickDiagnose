@@ -4,9 +4,15 @@ import {TabView} from "../../components/TabComponent/TabView";
 import {TabViewButton} from "../../components/TabComponent/TabViewButton";
 import {TabViewPage} from "../../components/TabComponent/TabViewPage";
 import {useTheme} from "../../hooks/useTheme";
+import {getConnectionType, setConnectionType} from "../../Services/ServiceFactory";
+import {useEffect, useState} from "react";
 
 export const Settings = () => {
     const { toggleTheme, mode } = useTheme();
+
+    const [currentConnectionType, setCurrentConnectionType] = useState(() => {
+        return getConnectionType();
+    });
 
     return (
         <div>
@@ -17,7 +23,17 @@ export const Settings = () => {
                 { key: "services", title: "Services" },
             ]}>
                 <TabViewPage key={"services"} title={"Services"} >
-
+                    <div className={"tabViewPageEntry"}>
+                        <span>Connection Service: </span>
+                        <select id="service" name="service"   value={currentConnectionType}
+                                onChange={(e) => {
+                                    setConnectionType(e.target.value as "websocket" | "bluetooth")
+                                    setCurrentConnectionType(e.target.value as "websocket" | "bluetooth")
+                                }}>
+                            <option value="websocket">Websocket</option>
+                            <option value="bluetooth">Bluetooth</option>
+                        </select>
+                    </div>
                 </TabViewPage>
                 <TabViewPage key={"security"} title={"Security"} >
 

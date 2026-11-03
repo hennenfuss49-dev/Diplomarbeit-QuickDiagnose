@@ -1,19 +1,40 @@
 import type { DataMessage } from "./types";
+import { ConnectionService } from "./ConnectionService";
 
-export class WebSocketService {
+export class WebSocketService implements ConnectionService {
 
     private ws: WebSocket | null = null;
 
     private listeners: Array<(data: DataMessage) => void> = [];
 
+    private statusListeners = new Set<(connected: boolean) => void>();
+
+    private notifyConnectionChange(connected: boolean) {
+        this.statusListeners.forEach(listener => listener(connected));
+    }
+
     constructor(private readonly url: string) {}
+
+    onConnectionChange(listener: (connected: boolean) => void): () => void {
+        this.statusListeners.add(listener);
+
+        return () => {
+            this.statusListeners.delete(listener);
+        };
+    }
 
     connect(): void {
 
+        if(this.url === "") {
+            console.log("WebSocket connection not found");
+            this.notifyConnectionChange(true);
+            return;
+        }
         this.ws = new WebSocket(this.url);
 
         this.ws.onopen = () => {
             console.log("WebSocket connected");
+            this.notifyConnectionChange(true);
         };
 
         this.ws.onmessage = (event: MessageEvent) => {
@@ -38,6 +59,8 @@ export class WebSocketService {
 
         this.ws.onclose = () => {
             console.log("WebSocket disconnected");
+            this.ws = null;
+            this.notifyConnectionChange(false);
         };
 
         this.ws.onerror = (error) => {
