@@ -1,6 +1,3 @@
-//
-// Created by Rafael Ortner on 06/10/2026.
-//
 #pragma once
 
 #include <Arduino.h>
@@ -15,16 +12,33 @@ public:
     {
     }
 
+    // Add live data
     void add(
         const String& name,
         const String& value,
-        const String& unit = ""
+        const String& unit
     )
     {
-        datapoints.push_back({
+        liveDataPoints.push_back({
             name,
             value,
             unit
+        });
+    }
+
+    // Add error code
+    void add(
+        const String& code,
+        const String& description,
+        const String& state,
+        const String& timestamp
+    )
+    {
+        errorCodePoints.push_back({
+            code,
+            description,
+            state,
+            timestamp
         });
     }
 
@@ -32,13 +46,18 @@ public:
         return name;
     }
 
-    const std::vector<DataPoint>& getDataPoints() const {
-        return datapoints;
+    const std::vector<DataPointLiveData>& getLiveDataPoints() const {
+        return liveDataPoints;
+    }
+
+    const std::vector<DataPointErrorCodes>& getErrorCodePoints() const {
+        return errorCodePoints;
     }
 
 private:
 
     String name;
 
-    std::vector<DataPoint> datapoints;
+    std::vector<DataPointLiveData> liveDataPoints;
+    std::vector<DataPointErrorCodes> errorCodePoints;
 };

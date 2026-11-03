@@ -30,35 +30,34 @@ void WebSocketCommunication::loop() {
     ws.cleanupClients();
 }
 
-bool WebSocketCommunication::send(const DataSet &dataset) {
+bool WebSocketCommunication::send(const DataPointLiveData &datapoint) {
     if (!connected()) {
         return false;
     }
-    JSONVar root;
 
-    root["type"] = "dataset";
-    root["name"] = dataset.getName();
+    JSONVar jsonPoint;
 
-    JSONVar datapoints;
+    jsonPoint["name"] = datapoint.name;
+    jsonPoint["value"] = datapoint.value;
+    jsonPoint["unit"] = datapoint.unit;
 
-    int index = 0;
+    ws.textAll(JSON.stringify(jsonPoint));
+    return true;
+}
 
-    for (const DataPoint& point : dataset.getDataPoints()) {
-
-        JSONVar jsonPoint;
-
-        jsonPoint["name"] = point.name;
-        jsonPoint["value"] = point.value;
-        jsonPoint["unit"] = point.unit;
-
-        datapoints[index++] = jsonPoint;
+bool WebSocketCommunication::send(const DataPointErrorCodes &datapoint) {
+    if (!connected()) {
+        return false;
     }
 
-    root["datapoints"] = datapoints;
+    JSONVar jsonPoint;
 
-    String json = JSON.stringify(root);
+    jsonPoint["code"] = datapoint.code;
+    jsonPoint["description"] = datapoint.description;
+    jsonPoint["state"] = datapoint.state;
+    jsonPoint["timestamp"] = datapoint.timestamp;
 
-    ws.textAll(json);
+    ws.textAll(JSON.stringify(jsonPoint));
     return true;
 }
 
@@ -71,21 +70,60 @@ bool WebSocketCommunication::send(const String &message) {
     return true;
 }
 
-bool WebSocketCommunication::send(const DataPoint &datapoint) {
+
+bool WebSocketCommunication::send(const DataSet &dataset) {
     if (!connected()) {
         return false;
     }
 
-    JSONVar jsonPoint;
+    JSONVar root;
 
-    jsonPoint["name"] = datapoint.name;
-    jsonPoint["value"] = datapoint.value;
-    jsonPoint["unit"] = datapoint.unit;
+    root["type"] = "dataset";
+    root["name"] = dataset.getName();
 
-    String json = JSON.stringify(jsonPoint);
+    // Leeres JSON-Array initialisieren
+    JSONVar datapoints = JSON.parse("[]");
+
+    int index = 0;
+
+    if (dataset.getName() == "live_data") {
+
+        for (const DataPointLiveData &point : dataset.getLiveDataPoints()) {
+
+            JSONVar jsonPoint;
+
+            jsonPoint["name"] = point.name;
+            jsonPoint["value"] = point.value;
+            jsonPoint["unit"] = point.unit;
+
+            datapoints[index++] = jsonPoint;
+        }
+
+    }
+    else if (dataset.getName() == "error_codes") {
+
+        for (const DataPointErrorCodes &point : dataset.getErrorCodePoints()) {
+
+            JSONVar jsonPoint;
+
+            jsonPoint["code"] = point.code;
+            jsonPoint["description"] = point.description;
+            jsonPoint["state"] = point.state;
+            jsonPoint["timestamp"] = point.timestamp;
+
+            datapoints[index++] = jsonPoint;
+        }
+    }
+
+    root["datapoints"] = datapoints;
+
+    String json = JSON.stringify(root);
+
     ws.textAll(json);
+
     return true;
 }
+
 
 bool WebSocketCommunication::receive(String &message) {
     if (receivedMessage.length() == 0) {

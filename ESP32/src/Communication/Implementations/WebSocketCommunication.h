@@ -15,9 +15,17 @@ public:
     bool begin() override;
     void loop() override;
 
-    bool send(const DataSet& dataset);
-    bool send(const String& dataset) override;
-    bool send(const DataPoint& dataset);
+    // Gesamtes Dataset senden
+    bool send(const DataSet &dataset);
+
+    // Einzelne Live-Daten senden
+    bool send(const DataPointLiveData &datapoint);
+
+    // Einzelnen Fehlercode senden
+    bool send(const DataPointErrorCodes &datapoint);
+
+    // String senden
+    bool send(const String &message) override;
     bool receive(String& message) override;
 
     bool connected() override;
