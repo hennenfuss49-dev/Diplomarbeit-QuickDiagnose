@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ESP32-S3 Bluetooth Test</title>
+<style>
+:root {font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#18222e;background:#f5f7fa}
+body {margin:0;padding:36px 16px}
+main {max-width:680px;margin:auto;background:white;border:1px solid #dde3eb;border-radius:14px;padding:30px;box-shadow:0 5px 20px #0000000a}
+h1 {margin:0 0 8px;font-size:25px}
+p {line-height:1.55;color:#526071}
+button {cursor:pointer;background:#184f84;color:white;border:none;border-radius:8px;padding:12px 18px;font-weight:600;font-size:15px;margin-right:8px}
+button:disabled {opacity:.4;cursor:default}
+button.secondary {background:#e7edf4;color:#223041}
+.panel {border:1px solid #dbe4ec;border-radius:9px;padding:16px;margin:20px 0}
+.small {font-size:13px;color:#617084}
+#value {font-size:35px;font-weight:700;letter-spacing:-.02em;word-break:break-all}
+#log {white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.65;background:#101e2d;color:#dceaf8;padding:15px;border-radius:9px;min-height:140px;max-height:350px;overflow:auto}
+#status {font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<h1>ESP32-S3 · Bluetooth-Test</h1>
+<p>Eigenstaendiger BLE-Test ohne die Diplomarbeits-Website. Chrome oder Edge unter Windows verwenden; die Seite muss ueber <code>http://localhost:8000</code> laufen.</p>
+<div>
+<button id="connect">Mit ESP32 verbinden</button>
+<button id="disconnect" class="secondary" disabled>Trennen</button>
+</div>
+<div class="panel"><div class="small">Status</div><div id="status">Nicht verbunden</div></div>
+<div class="panel"><div class="small">Letzter empfangener Wert</div><div id="value">–</div><div class="small" id="count">0 Nachrichten empfangen</div></div>
+<h3>Empfangsprotokoll</h3><div id="log">Noch keine Daten.</div>
+</main>
+<script>
+const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+let device, characteristic;
+let count = 0;
+const el = id => document.getElementById(id);
+function log(t) {
+  if (el('log').textContent === 'Noch keine Daten.') el('log').textContent = '';
+  el('log').textContent = new Date().toLocaleTimeString() + '  ' + t + '\n' + el('log').textContent;
+}
+function setConnected(state) {
+  el('status').textContent = state ? 'Verbunden' : 'Nicht verbunden';
+  el('connect').disabled = state;
+  el('disconnect').disabled = !state;
+}
+function received(event) {
+  const text = new TextDecoder().decode(event.target.value);
+  count++;
+  el('value').textContent = text;
+  el('count').textContent = count + ' Nachrichten empfangen';
+  log(text);
+}
+el('connect').addEventListener('click', async () => {
+  if (!navigator.bluetooth) {
+    log('Web Bluetooth nicht verfügbar. Chrome/Edge und localhost verwenden.');
+    return;
+  }
+  try {
+    el('status').textContent = 'Suche Gerät ...';
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ namePrefix: 'OBD-BLE-Test' }],
+      optionalServices: [SERVICE_UUID]
+    });
+    device.addEventListener('gattserverdisconnected', () => {
+      setConnected(false);
+      log('Bluetooth getrennt.');
+    });
+    log('Gewählt: ' + device.name);
+    const gatt = await device.gatt.connect();
+    const service = await gatt.getPrimaryService(SERVICE_UUID);
+    characteristic = await service.getCharacteristic(TX_UUID);
+    characteristic.addEventListener('characteristicvaluechanged', received);
+    await characteristic.startNotifications();
+    setConnected(true);
+    log('Benachrichtigungen aktiviert.');
+  } catch (e) {
+    setConnected(false);
+    log('Verbindungsfehler: ' + e.message);
+  }
+});
+el('disconnect').addEventListener('click', () => {
+  if (device && device.gatt.connected) device.gatt.disconnect();
+  setConnected(false);
+});
+</script>
+</body>
+</html>
