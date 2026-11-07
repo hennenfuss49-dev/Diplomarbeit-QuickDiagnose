@@ -1,21 +1,19 @@
+export type DataValue =
+    | string
+    | number
+    | boolean
+    | null
+    | DataValue[]
+    | { [key: string]: DataValue };
+
+export interface DataPoint {
+    [key: string]: DataValue;
+}
+
 export interface DataSet {
+    type?: string;
     name: string;
     datapoints: DataPoint[];
-}
-
-// for Live-Data
-export interface DataPoint {
-    name: string;
-    value: string;
-    unit: string;
-}
-
-// for Error Codes
-export interface DataPoint {
-    code: string;
-    description: string;
-    state: string;
-    timestamp: Date;
 }
 
 export interface DataMessage {

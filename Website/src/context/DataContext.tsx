@@ -1,122 +1,130 @@
+
 import React, {
     createContext,
     useContext,
     useEffect,
-    useMemo, useRef,
-    useState
+    useMemo,
+    useRef,
+    useState,
+    useCallback
 } from "react";
 
-import type {DataMessage, DataPoint, DataSet} from "../Services/types";
-import { WebSocketService } from "../Services/WebSocketService";
+import type { DataMessage, DataPoint } from "../Services/types";
 import type { ConnectionService } from "../Services/ConnectionService";
-import {createConnection} from "../Services/ServiceFactory";
+import { createConnection } from "../Services/ServiceFactory";
 
+export type DatasetStore = Record<string, DataPoint[]>;
 
 interface DataContextType {
-    datasets: Record<string, DataPoint[]>;   // dataset name -> datapoints
-    liveData: Record<string, DataPoint>;     // point.name -> point (aus "live_data")
-    errorCodes: DataSet;   // dataset name -> errorCodes
+    datasets: DatasetStore;
 
     isConnected: boolean;
     connectService: () => void;
     disconnectService: () => void;
 }
 
-
 const DataContext = createContext<DataContextType | null>(null);
 
-
-export function DataProvider(
-    { children }: { children: React.ReactNode }
-) {
-
-    const [datasets, setDatasets] = useState<Record<string, DataPoint[]>>({});
+export function DataProvider({
+                                 children
+                             }: {
+    children: React.ReactNode;
+}) {
+    const [datasets, setDatasets] = useState<DatasetStore>({});
     const [isConnected, setIsConnected] = useState(false);
 
     const connectionRef = useRef<ConnectionService | null>(null);
-    const unsubscribeRef = useRef<(() => void)[]>([]);
+    const unsubscribeRef = useRef<Array<() => void>>([]);
 
-    // Disconnect when DataProvider unmounts
+    const cleanupSubscriptions = useCallback(() => {
+        unsubscribeRef.current.forEach(unsubscribe => unsubscribe());
+        unsubscribeRef.current = [];
+    }, []);
+
+    const disconnectService = useCallback(() => {
+        cleanupSubscriptions();
+
+        const connection = connectionRef.current;
+        connectionRef.current = null;
+
+        connection?.disconnect();
+        setIsConnected(false);
+    }, [cleanupSubscriptions]);
+
+    // Disconnect when the provider unmounts
     useEffect(() => {
         return () => {
+            cleanupSubscriptions();
+
             connectionRef.current?.disconnect();
             connectionRef.current = null;
         };
-    }, []);
+    }, [cleanupSubscriptions]);
 
-    const connectService = () => {
+    const connectService = useCallback(() => {
         if (connectionRef.current !== null) return;
 
         const connection = createConnection();
         connectionRef.current = connection;
 
-        const unsubscribeData = connection.subscribe((message: DataMessage) => {
-            if (message.type === "dataset") {
-                setDatasets(prev => ({
-                    ...prev,
-                    [message.name]: message.datapoints
-                }));
+        const unsubscribeData = connection.subscribe(
+            (message: DataMessage) => {
+                if (connectionRef.current !== connection) return;
+
+                if (
+                    message.type === "dataset" &&
+                    Array.isArray(message.datapoints)
+                ) {
+                    setDatasets(prev => ({
+                        ...prev,
+                        [message.name]: message.datapoints
+                    }));
+                }
             }
-        });
+        );
 
-        const unsubscribeStatus = connection.onConnectionChange((connected) => {
-            if (connectionRef.current !== connection) return;
+        const unsubscribeStatus = connection.onConnectionChange(
+            (connected: boolean) => {
+                if (connectionRef.current !== connection) return;
 
-            setIsConnected(connected);
+                setIsConnected(connected);
 
-            if (!connected) {
-                unsubscribeRef.current.forEach(unsubscribe => unsubscribe());
-                unsubscribeRef.current = [];
-                connectionRef.current = null;
+                if (!connected) {
+                    cleanupSubscriptions();
+                    connectionRef.current = null;
+                }
             }
-        });
+        );
 
-        unsubscribeRef.current = [unsubscribeData, unsubscribeStatus];
+        unsubscribeRef.current = [
+            unsubscribeData,
+            unsubscribeStatus
+        ];
 
-        connection.connect();
-    };
+        try {
+            connection.connect();
+        } catch (error) {
+            cleanupSubscriptions();
+            connectionRef.current = null;
+            setIsConnected(false);
+            console.error("Connection failed:", error);
+        }
+    }, [cleanupSubscriptions]);
 
-    const disconnectService = () => {
-        unsubscribeRef.current.forEach(unsubscribe => unsubscribe());
-        unsubscribeRef.current = [];
-
-        connectionRef.current?.disconnect();
-        connectionRef.current = null;
-
-        setIsConnected(false);
-    };
-
-
-    const liveData = useMemo(
-        () => Object.fromEntries(
-            (datasets["live_data"] ?? []).map(
-                point => [point.name, point]
-            )
-        ),
-        [datasets]
-    );
-
-    const errorCodes: DataSet = useMemo(
-        () => ({
-            type: "dataset",
-            name: "error_codes",
-            datapoints: datasets["error_codes"] ?? []
-        }),
-        [datasets]
-    );
-
-    const value = useMemo(
+    const value = useMemo<DataContextType>(
         () => ({
             datasets,
-            liveData,
-            errorCodes,
             isConnected,
             connectService,
             disconnectService
         }),
-        [datasets, liveData, errorCodes, isConnected]
+        [
+            datasets,
+            isConnected,
+            connectService,
+            disconnectService
+        ]
     );
-
 
     return (
         <DataContext.Provider value={value}>
@@ -125,9 +133,7 @@ export function DataProvider(
     );
 }
 
-
 export function useVehicleData(): DataContextType {
-
     const context = useContext(DataContext);
 
     if (!context) {

@@ -12,6 +12,8 @@ import FilterIcon from '../../assets/img/filter_icon.svg';
 import SettingsIcon from '../../assets/img/settings_icon.svg';
 import React, {useState} from "react";
 import {useVehicleData} from "../../context/DataContext";
+import {PDFReportService} from "../../Services/PDFReportService";
+import {DataSet} from "../../Services/types";
 
 
 const initialCards = [
@@ -23,7 +25,12 @@ const initialCards = [
         content: (
             <ListDisplay
                 datakey="error_codes"
-                header={["Code", "Description", "State", "Timestamp"]}
+                columns={[
+                    { key: "code", label: "Error Code" },
+                    { key: "description", label: "Description" },
+                    { key: "state", label: "Status" },
+                    { key: "timestamp", label: "Time" }
+                ]}
             />
         ),
     },
@@ -31,7 +38,12 @@ const initialCards = [
         id: "card-6",
         title: "Card 6",
         isVisible: true,
-        content: <SimpleDataList dataset={mockDataList} />,
+        content: <SimpleDataList
+            dataset={mockDataList}
+            labelKey="key"
+            valueKey="value"
+            unitKey="unit"
+        />
     },
     {
         id: "card-1",
@@ -40,8 +52,10 @@ const initialCards = [
         content: (
             <NumberRangeDisplay
                 datakey="rpm"
-                higherBound={8000}
                 lowerBound={0}
+                higherBound={8000}
+                valueKey="value"
+                unitKey="unit"
             />
         ),
     },
@@ -54,6 +68,8 @@ const initialCards = [
                 datakey="speed"
                 higherBound={240}
                 lowerBound={0}
+                valueKey="value"
+                unitKey="unit"
             />
         ),
     },
@@ -66,6 +82,8 @@ const initialCards = [
                 datakey="coolant"
                 higherBound={150}
                 lowerBound={0}
+                valueKey="value"
+                unitKey="unit"
             />
         ),
     },
@@ -85,6 +103,8 @@ const initialCards = [
                 datakey="engine_load"
                 higherBound={20}
                 lowerBound={0}
+                valueKey="value"
+                unitKey="unit"
             />
         ),
     },
@@ -96,7 +116,7 @@ export const Dashboard = () => {
     const [cards, setCards] = useState(initialCards);
     const [draggedId, setDraggedId] = useState<string | null>(null);
     const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
-    const { isConnected, connectService, disconnectService } = useVehicleData();
+    const { datasets, isConnected, connectService, disconnectService } = useVehicleData();
 
     const handleDragStart = (id: string, e: React.DragEvent) => {
         setDraggedId(id);
@@ -151,6 +171,31 @@ export const Dashboard = () => {
             )
         );
     };
+
+
+    async function generatePdfReport() {
+        try {
+            const reportDatasets: DataSet[] =
+                Object.entries(datasets).map(
+                    ([name, datapoints]) => ({
+                        type: "dataset",
+                        name,
+                        datapoints
+                    })
+                );
+
+            console.log("PDF datasets:", reportDatasets);
+
+            await PDFReportService.generateReport({
+                title: "QuickDiagnose - Vehicle Report",
+                filename: "Vehicle_Diagnosis.pdf",
+                datasets: reportDatasets
+            });
+
+        } catch (error) {
+            console.error("PDF generation failed:", error);
+        }
+    }
 
     return (
         <div className="dashboard">
@@ -220,6 +265,10 @@ export const Dashboard = () => {
                 </div>
 
                 <div className="right">
+                    <button className="actionButton" onClick={generatePdfReport}>
+                        <span className="search-icon">⌕</span>
+                        <span >Print Report</span>
+                    </button>
                     <button className="actionButton" onClick={isConnected ? disconnectService : connectService}>
                         <div className={!isConnected ? "statusDisconnected" : "statusConnected"}></div>
                         {isConnected ? "Disconnect" : "Connect"}

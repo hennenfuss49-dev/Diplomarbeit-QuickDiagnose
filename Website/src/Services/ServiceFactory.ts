@@ -18,7 +18,7 @@ export function getConnectionType(): ConnectionType {
 export function createConnection(): ConnectionService {
     switch (connectionType) {
         case "websocket":
-            return new WebSocketService("");
+            return new WebSocketService("ws://127.0.0.100:80/ws");
 
         case "bluetooth":
             // return new BluetoothService();

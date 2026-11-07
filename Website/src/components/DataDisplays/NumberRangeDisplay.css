@@ -1,15 +1,46 @@
 .display-container {
     display: grid;
-    grid-template-columns: 50% 50%;
-    grid-template-rows: 25% 25% 25% 25%;
-    grid-template-areas: "value value"
-                         "unit unit"
-                         "rangeDisplay rangeDisplay"
-                         "bounds bounds";
-    min-height: 100%;
-    min-width: 80%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+        "value value"
+        "unit unit"
+        "rangeDisplay rangeDisplay"
+        "bounds bounds";
+
+    width: 100%;
+    min-width: 0;
+    min-height: 220px;
+    box-sizing: border-box;
+
     align-items: center;
     justify-items: center;
+    gap: 6px;
+    padding: 24px 16px;
+
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.display-container:hover {
+    border-color: #7ddc3a;
+}
+
+.value {
+    grid-area: value;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+}
+
+.unit {
+    grid-area: unit;
+    font-size: 0.9rem;
+    color: #aeb5bf;
+    text-align: center;
 }
 
 .rangeDisplay {
@@ -17,24 +48,24 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    min-width: 0;
 }
 
-.value {
-    grid-area: value;
-    font-size: 1.5em;
-}
-.unit {
-    grid-area: unit;
-}
 .bounds {
     grid-area: bounds;
     display: flex;
-    justify-content: space-around;
-    min-width: 100%;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.8rem;
+    color: #aeb5bf;
 }
 
 .gauge {
-    width: 70%;
+    display: block;
+    width: 100%;
+    max-width: 190px;
+    height: auto;
 }
 
 .gauge-background,
@@ -42,7 +73,6 @@
     fill: none;
     stroke-width: 12;
     stroke-linecap: round;
-
 }
 
 .gauge-background {
@@ -51,4 +81,5 @@
 
 .gauge-progress {
     stroke: #7ddc3a;
+    transition: stroke-dashoffset 0.35s ease;
 }

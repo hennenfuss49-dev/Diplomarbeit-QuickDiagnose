@@ -1,42 +1,74 @@
-// styles
-import './ListDisplay.css'
-import {ErrorCodeDataSet} from "../../types/ErrorCodes";
+import "./ListDisplay.css";
 import React from "react";
-import {DataSet} from "../../Services/types";
-import {useVehicleData} from "../../context/DataContext";
+import { useVehicleData } from "../../context/DataContext";
+import { displayValue } from "../../Services/DataUtils";
+import { NoData } from "./NoData";
+import type { DataPoint } from "../../Services/types";
 
-function generateDataPointList(dataset: DataSet): React.JSX.Element[] {
-    return dataset.datapoints.map((dataPoint) => (
-        <li className="listItem" key={`${dataPoint.code}-${dataPoint?.timestamp}`}>
-            <span>{dataPoint?.code}</span>
-            <span>{dataPoint?.description}</span>
-            <span>{dataPoint?.state}</span>
-            {/*<span>{dataPoint.timestamp.toLocaleString()}</span>*/}
+export interface ListColumn {
+    key: string;
+    label: string;
+}
+
+interface ListDisplayProps {
+    datakey: string;
+    columns: ListColumn[];
+}
+
+function generateDataPointList(
+    datapoints: DataPoint[],
+    columns: ListColumn[]
+): React.JSX.Element[] {
+    return datapoints.map((dataPoint, index) => (
+        <li className="listItem" key={index}>
+            {columns.map(column => (
+                <span key={column.key}>
+                    {displayValue(dataPoint[column.key])}
+                </span>
+            ))}
         </li>
     ));
 }
 
+export const ListDisplay = ({
+                                datakey,
+                                columns
+                            }: ListDisplayProps) => {
+    const { datasets } = useVehicleData();
 
-type ListDisplayProps = {
-    datakey: string;
-    header: string[];
-};
+    const datapoints = datasets[datakey] ?? [];
 
-export const ListDisplay = ({ datakey, header }: ListDisplayProps) => {
-    const { errorCodes } = useVehicleData()
+    const hasData =
+        columns.length > 0 &&
+        datapoints.some(point =>
+            columns.some(column => {
+                const value = point[column.key];
 
+                return value !== undefined &&
+                    value !== null &&
+                    value !== "";
+            })
+        );
 
     return (
-        <div className={"listContainer"}>
-            <div className="listHeader">
-                {header.map((e) => (
-                    <span key={e}>{e}</span>
-                ))}
-            </div>
+        <div className="listContainer">
+            {hasData ? (
+                <>
+                    <div className="listHeader">
+                        {columns.map(column => (
+                            <span key={column.key}>
+                                {column.label}
+                            </span>
+                        ))}
+                    </div>
 
-            <ul>
-                {generateDataPointList(errorCodes)}
-            </ul>
+                    <ul>
+                        {generateDataPointList(datapoints, columns)}
+                    </ul>
+                </>
+            ) : (
+                <NoData />
+            )}
         </div>
     );
 };
