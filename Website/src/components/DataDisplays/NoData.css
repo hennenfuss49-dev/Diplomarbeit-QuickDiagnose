@@ -1,0 +1,21 @@
+.noData {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    min-height: 120px;
+    padding: 20px;
+    box-sizing: border-box;
+
+    color: #8b949e;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.noDataIcon {
+    font-size: 1.8rem;
+    color: #555e68;
+}
