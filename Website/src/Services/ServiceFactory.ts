@@ -1,6 +1,6 @@
 import type { ConnectionService } from "./ConnectionService";
 import { WebSocketService } from "./WebSocketService";
-// import { BluetoothService } from "./BluetoothService";
+import { BluetoothService } from "./BluetoothService";
 
 export type ConnectionType = "websocket" | "bluetooth";
 
@@ -21,7 +21,6 @@ export function createConnection(): ConnectionService {
             return new WebSocketService("ws://127.0.0.100:80/ws");
 
         case "bluetooth":
-            // return new BluetoothService();
-            return new WebSocketService("bluetooth");
+            return new BluetoothService();
     }
 }

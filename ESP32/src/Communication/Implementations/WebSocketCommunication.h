@@ -6,11 +6,11 @@
 #include "ESPAsyncWebServer.h"
 #include "Communication/CommunicationManager.h"
 #include "../DataSet.cpp"
-#include "../DataPoint.cpp"
+#include "../Datapoint.cpp"
 
 class WebSocketCommunication : public CommunicationManager {
 public:
-    explicit WebSocketCommunication(uint16_t port = 80);
+    explicit WebSocketCommunication(uint16_t port = 80, CommunicationManager* datasetTransport = nullptr);
 
     bool begin() override;
     void loop() override;
@@ -33,6 +33,7 @@ public:
 private:
     AsyncWebServer server;
     AsyncWebSocket ws;
+    CommunicationManager* datasetTransport;
 
     bool isConnected{};
     String receivedMessage;

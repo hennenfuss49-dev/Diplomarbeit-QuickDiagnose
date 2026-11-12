@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
+#include "Communication/Implementations/BLECommunication.h"
 #include "Communication/Implementations/WebSocketCommunication.h"
 
 // true = virtuelles Auto, false = echter Freematics-Adapter
@@ -25,8 +26,9 @@ bool firstDtcScan = true;
 
 const int MAX_DTC_CODES = 20;
 
+BLECommunication bluetooth;
 // Gemeinsame Kommunikationsinstanz fuer Live-Daten und Fehlercodes.
-WebSocketCommunication communication;
+WebSocketCommunication communication(80, &bluetooth);
 
 
 void simulatedValues(float &rpm, int &speed,
@@ -455,7 +457,7 @@ int parseStoredDTCs(const String &response, String codes[], int maxCodes)
 
 
 // Gespeicherte emissionsbezogene Fehlercodes (OBD Mode 03) auslesen
-// und mit genau demselben DataSet/WebSocket-System wie die Live-Daten
+// und mit genau demselben DataSet-System wie die Live-Daten
 // an die Website schicken.
 void readAndSendStoredDTCs()
 {
@@ -518,7 +520,7 @@ void readAndSendStoredDTCs()
     Serial.println("DTC-Datensatz an Website gesendet.");
   }
   else {
-    Serial.println("DTC-Datensatz nicht gesendet: kein WebSocket-Client verbunden.");
+    Serial.println("DTC-Datensatz konnte nicht gesendet werden.");
   }
 }
 
@@ -549,6 +551,7 @@ void setup()
 
   // WebSocket starten
   communication.begin();
+  bluetooth.begin();
 
   Serial.println();
   Serial.println("==============================");
@@ -576,6 +579,7 @@ void setup()
       Serial.println("TX / RX / GND kontrollieren.");
 
       while (true) {
+        bluetooth.loop();
         delay(1000);
       }
     }
@@ -659,6 +663,7 @@ void loop()
   int coolant = 0;
 
   communication.loop();
+  bluetooth.loop();
 
   Serial.println();
   Serial.println("-----------------------------");
