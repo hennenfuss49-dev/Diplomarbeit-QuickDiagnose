@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include <vector>
-#include "Datapoint.cpp"
+#include "DataPoint.cpp"
 
 class DataSet {
 public:

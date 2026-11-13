@@ -8,10 +8,9 @@
 #include "../CommunicationManager.h"
 #include "WebSocketCommunication.h"
 
-WebSocketCommunication::WebSocketCommunication(uint16_t port, CommunicationManager* datasetTransport)
+WebSocketCommunication::WebSocketCommunication(uint16_t port)
     : server(port),
-      ws("/ws"),
-      datasetTransport(datasetTransport)
+      ws("/ws")
 {
     instance = this;
 }
@@ -73,7 +72,7 @@ bool WebSocketCommunication::send(const String &message) {
 
 
 bool WebSocketCommunication::send(const DataSet &dataset) {
-    if (!connected() && !(datasetTransport && datasetTransport->connected())) {
+    if (!connected()) {
         return false;
     }
 
@@ -120,9 +119,9 @@ bool WebSocketCommunication::send(const DataSet &dataset) {
 
     String json = JSON.stringify(root);
 
-    const bool sentByWebSocket = send(json);
-    const bool sentByOtherTransport = datasetTransport && datasetTransport->send(json);
-    return sentByWebSocket || sentByOtherTransport;
+    ws.textAll(json);
+
+    return true;
 }
 
 
