@@ -6,7 +6,12 @@
 #include <ESPAsyncWebServer.h>
 #include <Arduino_JSON.h>
 #include "../CommunicationManager.h"
+#include "BLECommunication.h"
 #include "WebSocketCommunication.h"
+
+namespace {
+BLECommunication bluetooth;
+}
 
 WebSocketCommunication::WebSocketCommunication(uint16_t port)
     : server(port),
@@ -23,11 +28,13 @@ bool WebSocketCommunication::begin() {
     server.begin();
 
     Serial.println("WebSocket server started");
+    bluetooth.begin();
     return true;
 }
 
 void WebSocketCommunication::loop() {
     ws.cleanupClients();
+    bluetooth.loop();
 }
 
 bool WebSocketCommunication::send(const DataPointLiveData &datapoint) {
@@ -72,7 +79,9 @@ bool WebSocketCommunication::send(const String &message) {
 
 
 bool WebSocketCommunication::send(const DataSet &dataset) {
-    if (!connected()) {
+    const bool websocketConnected = connected();
+    const bool bluetoothConnected = bluetooth.connected();
+    if (!websocketConnected && !bluetoothConnected) {
         return false;
     }
 
@@ -119,9 +128,11 @@ bool WebSocketCommunication::send(const DataSet &dataset) {
 
     String json = JSON.stringify(root);
 
-    ws.textAll(json);
-
-    return true;
+    if (websocketConnected) {
+        ws.textAll(json);
+    }
+    const bool sentByBluetooth = bluetoothConnected && bluetooth.send(json);
+    return websocketConnected || sentByBluetooth;
 }
 
 
